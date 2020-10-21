@@ -5,7 +5,6 @@ const router = express.Router();
 
 // import Sequelize and models
 const { sequelize, Course } = require('../models');
-const { put } = require('./users');
 
 function asyncHandler(cb){
     return async (req,res, next) => {
@@ -15,7 +14,7 @@ function asyncHandler(cb){
             next(err);
         }
     }
-}
+};
 
 // Returns a list of courses (including the user that owns each course)
 router.get('/', asyncHandler(async (req, res)=> {
@@ -61,7 +60,6 @@ function updateFields(field) {
 router.put('/:id', asyncHandler(async (req, res)=> {
     const course = await Course.findByPk(req.params.id);
     if(course) {
-
         // Look through the attributes in Course, if the attribute (field) is not id, createdAt, or updatedAt then push to 'availableFields'
         let availableFields = [];
         for (let field in Course.rawAttributes) {
@@ -75,7 +73,7 @@ router.put('/:id', asyncHandler(async (req, res)=> {
         for (let key in req.body) {
             requestFields.push(key)
         }
- 
+
         // Check every field in requestFields against availableFields, if all values in requestedFields are included in availableFields update the Course modal
         // with the relative data passed in the req.body
         // Else throw an error indicating that the user has passed an invalid argument into the request
@@ -87,9 +85,10 @@ router.put('/:id', asyncHandler(async (req, res)=> {
             const err = new Error('Invalid argument passed')
             throw err;
         }
-    
+
         await course.save();
         res.status(204).end();
+
     } else {
         res.status(404).json({message: "Course not found."});
     }

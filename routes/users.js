@@ -19,13 +19,6 @@ function asyncHandler(cb){
 
 // Returns the currently authenticated user
 router.get('/', authenticateUser, asyncHandler(async (req, res)=> {
-    // const users = await User.findAll();
-    // if(users) {
-    //     res.status(200).json(users);
-    // } else {
-    //     res.status(404).json({message: "Could not retrieve users"})
-    // }
-
     // Retrieve the current authenticated user's information from the Request object's currentUser property:
     const user = req.currentUser;
 
@@ -51,7 +44,5 @@ router.post('/', asyncHandler(async (req, res)=> {
         }
     }
 }));
-
-
 
 module.exports = router; 
