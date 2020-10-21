@@ -4,6 +4,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const routes = require('./routes/index');
+
 // import Sequelize and models
 const { sequelize, User, Course } = require('./models');
 
@@ -17,23 +19,8 @@ const app = express();
 app.use(morgan('dev'));
 
 // TODO setup your api routes here
-
-// setup a friendly greeting for the root route
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to the REST API project!',
-  });
-});
-
-app.get('/users', async (req, res) => {
-  const users = await User.findAll();
-  res.json(users);
-});
-app.get('/courses', async (req, res) => {
-  const courses = await Course.findAll();
-  res.json(courses);
-});
-
+app.use('/api', routes);
+ 
 // send 404 if no other route matched
 app.use((req, res) => {
   res.status(404).json({
@@ -59,6 +46,14 @@ app.use((err, req, res, next) => {
   try {
     await sequelize.authenticate();
     console.log('Connection has been established successfully.');
+
+    const users = await User.findAll();
+    console.log(users);
+
+    const courses = await Course.findAll();
+    // console.log(courses);
+
+
   } catch (error) {
     console.error('Unable to connect to the database:', error);
   }
