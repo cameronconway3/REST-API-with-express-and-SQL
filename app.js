@@ -1,3 +1,8 @@
+/*
+Treehouse Techdegree:
+FSJS Project 9 - REST API
+*/
+
 'use strict';
 
 // load modules
