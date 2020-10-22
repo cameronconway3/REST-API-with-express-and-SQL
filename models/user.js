@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
+            // User has many courses
             User.hasMany(models.Course, {
                 foreignKey: {
                     fieldName: 'userId',
@@ -64,6 +65,7 @@ module.exports = (sequelize, DataTypes) => {
         password: {
             type: DataTypes.STRING,  
             allowNull: false,
+            // Hash the password using bcryptjs
             set(val) {
                 const hashedPassword = bcrypt.hashSync(val, 10);
                 this.setDataValue('password', hashedPassword);
@@ -74,11 +76,7 @@ module.exports = (sequelize, DataTypes) => {
                 },
                 notEmpty: {
                     msg: 'Please provide a password'
-                },
-                // len: {
-                //     args: [8, 20],
-                //     msg: 'The password should be between 8 and 20 characters in length'
-                // }
+                }
             }
         }
     }, {

@@ -26,9 +26,13 @@ exports.authenticateUser = async (req, res, next) => {
                     req.user = user;
                     next();
                 } else {
-                    res.status(401).json({ error: "Wrong password" });
+                    res.status(401).json({ error: 'Wrong password' });
                 }
+            } else {
+                res.status(401).json({ error: 'User not found' });
             }
+        } else {
+            res.status(401).json({ error: 'Auth header not found' });
         }
     } catch(error) {
         res.status(401).json(error);

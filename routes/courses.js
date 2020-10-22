@@ -7,7 +7,6 @@ const router = express.Router();
 
 // import Sequelize and models
 const { sequelize, Course, User } = require('../models');
-const user = require('../models/user');
 
 function asyncHandler(cb){
     return async (req,res, next) => {
@@ -134,9 +133,6 @@ router.put('/:id', authenticateUser, asyncHandler(async (req, res)=> {
         } else {
             res.status(403).json({ message: "User doesn't own the requested course" })
         }
-
-
-
     } else {
         res.status(404).json({message: "Course not found."});
     }
@@ -145,9 +141,7 @@ router.put('/:id', authenticateUser, asyncHandler(async (req, res)=> {
 // Deletes a course and returns no content
 router.delete("/:id", authenticateUser, asyncHandler(async(req, res) => {
     const course = await Course.findByPk(req.params.id);
-
     if(course) {
-
         // Check that the user requesting owns the course
         // Get the authenticated user 
         const credentials = auth(req);
@@ -157,7 +151,7 @@ router.delete("/:id", authenticateUser, asyncHandler(async(req, res) => {
             }
         });
 
-        // Get the id of tje user trying to make the request
+        // Get the id of the user trying to make the request
         const authenticatedUserId = authUser.id;
 
         // If the user requesting the course is not equal to the courses userId then return a 403
@@ -167,11 +161,9 @@ router.delete("/:id", authenticateUser, asyncHandler(async(req, res) => {
         } else {
             res.status(403).json({ message: "User doesn't own the requested course" })
         }
-        
     } else {
         res.status(404).json({message: "Course not found."});
     }
-
 }));
 
 module.exports = router; 
