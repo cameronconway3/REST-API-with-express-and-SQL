@@ -115,21 +115,30 @@ router.put('/:id', authenticateUser, asyncHandler(async (req, res)=> {
             for (let key in req.body) {
                 requestFields.push(key)
             }
-            
-            // Check every field in requestFields against availableFields, if all values in requestedFields are included in availableFields update the Course modal
-            // with the relative data passed in the req.body
-            // Else throw an error indicating that the user has passed an invalid argument into the request
-            if( requestFields.every(x => availableFields.includes(x)) ) {
-                for (let key in req.body) {
-                    course[key] = req.body[key]
+
+            // Make sure that if the title or description fields are being requested to be updated that they are not empty
+            if(requestFields.includes('title') || requestFields.includes('description')) {
+                if(req.body.title.trim() == '' || req.body.description.trim() == '') {
+                    res.status(400).json({message: "Title and description fields cannot be empty"});
+                } else {
+
+                    // Check every field in requestFields against availableFields, if all values in requestedFields are included in availableFields update the Course modal
+                    // with the relative data passed in the req.body
+                    // Else throw an error indicating that the user has passed an invalid argument into the request
+                    if( requestFields.every(x => availableFields.includes(x)) ) {
+                        for (let key in req.body) {
+                            course[key] = req.body[key]
+                        }
+                    } else {
+                        const err = new Error('Invalid argument passed')
+                        throw err;
+                    }
+
+                    await course.save();
+                    res.status(204).end();
                 }
-            } else {
-                const err = new Error('Invalid argument passed')
-                throw err;
             }
 
-            await course.save();
-            res.status(204).end();
         } else {
             res.status(403).json({ message: "User doesn't own the requested course" })
         }
