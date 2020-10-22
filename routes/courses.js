@@ -102,10 +102,10 @@ router.put('/:id', authenticateUser, asyncHandler(async (req, res)=> {
 
         // If the user requesting the course is not equal to the courses userId then return a 403
         if(authenticatedUserId == course.userId) {
-            // Look through the attributes in Course, if the attribute (field) is not id, createdAt, or updatedAt then push to 'availableFields'
+            // Look through the attributes in Course, if the attribute (field) is not createdAt or updatedAt then push to 'availableFields'
             let availableFields = [];
             for (let field in Course.rawAttributes) {
-                if(field !== 'id' && field !== 'createdAt' && field !== 'updatedAt') {
+                if(field !== 'createdAt' && field !== 'updatedAt') {
                     availableFields.push(field)
                 }
             }
