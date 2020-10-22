@@ -33,10 +33,23 @@ router.get('/', authenticateUser, asyncHandler(async (req, res)=> {
 // Creates a user, sets the Location header to "/", and returns no content
 router.post('/', asyncHandler(async (req, res)=> {
     try {
-        await User.create(req.body);
-        res.status(201).set({
-            location: "/"
-        }).end();
+        // Check that email isn't already taken
+        const userDuplicateEmail = await User.findOne({
+            where: {
+                emailAddress: req.body.emailAddress
+            }
+        })
+
+        // If the email has already been taken return a 409 error (Conflict)
+        if(userDuplicateEmail) {
+            res.status(409).json({message: "This email address has already been taken"})
+        } else {
+            await User.create(req.body);
+            res.status(201).set({
+                location: "/"
+            }).end();
+        }
+
     } catch (error) {
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
             const errors = error.errors.map(err => err.message);
