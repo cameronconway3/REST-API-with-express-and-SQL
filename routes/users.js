@@ -19,15 +19,15 @@ function asyncHandler(cb){
 
 // Returns the currently authenticated user
 router.get('/', authenticateUser, asyncHandler(async (req, res)=> {
-    // Retrieve the current authenticated user's information from the Request object's currentUser property:
-    const user = req.currentUser;
-
-    // Use the Response object's json() method to return the current user's information formatted as JSON
-    res.status(200).json({
-        name: user.name,
-        username: user.username
-    });
-
+    const user = await User.findOne({
+        where: {
+          id: req.user.id
+        },
+        attributes: {
+          exclude: ["password", "createdAt", "updatedAt"]
+        }
+      });
+      res.status(200).json(user);
 }));
 
 // Creates a user, sets the Location header to "/", and returns no content
