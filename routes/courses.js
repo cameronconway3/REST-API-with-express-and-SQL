@@ -4,7 +4,8 @@ const express = require('express');
 const router = express.Router();
 
 // import Sequelize and models
-const { sequelize, Course } = require('../models');
+const { sequelize, Course, User } = require('../models');
+const user = require('../models/user');
 
 function asyncHandler(cb){
     return async (req,res, next) => {
@@ -18,7 +19,17 @@ function asyncHandler(cb){
 
 // Returns a list of courses (including the user that owns each course)
 router.get('/', asyncHandler(async (req, res)=> {
-    const courses = await Course.findAll();
+    const courses = await Course.findAll({
+        attributes: {
+            exclude: ["createdAt", "updatedAt"]
+        },
+        include: {
+            model: User,
+            attributes: {
+                exclude: ["password", "createdAt", "updatedAt"]
+            }
+        }
+    });
     if(courses) {
         res.status(200).json(courses);
     } else {
@@ -28,7 +39,20 @@ router.get('/', asyncHandler(async (req, res)=> {
 
 // Returns the course (including the user that owns the course) for the provided course ID
 router.get('/:id', asyncHandler(async (req, res)=> {
-    const course = await Course.findByPk(req.params.id);
+    const course = await Course.findOne({
+        where: {
+            id: req.params.id
+        },
+        attributes: {
+            exclude: ["createdAt", "updatedAt"]
+        },
+        include: {
+            model: User,
+            attributes: {
+                exclude: ["password", "createdAt", "updatedAt"]
+            }
+        }
+    });
     if(course) {
         res.status(200).json(course);
     } else {
@@ -40,7 +64,14 @@ router.get('/:id', asyncHandler(async (req, res)=> {
 router.post('/', asyncHandler(async (req, res)=> {
     try {
         await Course.create(req.body);
-        res.status(201).json({message: "Course successfully created"})
+        const course = await Course.findOne({
+            where: {
+                title: req.body.title
+            }
+        });
+        res.status(201).set({
+            location: `/api/courses/${course.id}`
+        }).end();
     } catch (error) {
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
             const errors = error.errors.map(err => err.message);
@@ -50,11 +81,6 @@ router.post('/', asyncHandler(async (req, res)=> {
         }
     }
 }));
-
-//update body
-function updateFields(field) {
-
-}
 
 // Updates a course and returns no content
 router.put('/:id', asyncHandler(async (req, res)=> {
@@ -73,7 +99,7 @@ router.put('/:id', asyncHandler(async (req, res)=> {
         for (let key in req.body) {
             requestFields.push(key)
         }
-
+        
         // Check every field in requestFields against availableFields, if all values in requestedFields are included in availableFields update the Course modal
         // with the relative data passed in the req.body
         // Else throw an error indicating that the user has passed an invalid argument into the request

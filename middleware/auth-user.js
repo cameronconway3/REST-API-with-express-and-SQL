@@ -11,6 +11,10 @@ exports.authenticateUser = async (req, res, next) => {
     // Use the auth() method to parse the user's credentials from the Authorization header, assign them to the variable 'credentials'
     // Assuming that the request contains a valid Basic Authentication Authorization header value, the credentials variable will be set to an object containing the user's key and secret (their username and password).
     const credentials = auth(req);
+    const username = credentials.name;
+    const pass = credentials.pass;
+
+    console.log(credentials)
 
      // If credentials are available
     if (credentials) {
