@@ -85,65 +85,28 @@ router.post('/', authenticateUser, asyncHandler(async (req, res)=> {
 
 // Updates a course and returns no content
 router.put('/:id', authenticateUser, asyncHandler(async (req, res)=> {
-    const course = await Course.findByPk(req.params.id);
-    if(course) {
-
-        // Check that the user requesting owns the course
-        // Get the authenticated user 
-        const credentials = auth(req);
-        const authUser = await User.findOne({
-            where: {
-                emailAddress: credentials.name
-            }
-        })
-
-        // Get the id of tje user trying to make the request
-        const authenticatedUserId = authUser.id;
-
-        // If the user requesting the course is not equal to the courses userId then return a 403
-        if(authenticatedUserId == course.userId) {
-            // Look through the attributes in Course, if the attribute (field) is not createdAt or updatedAt then push to 'availableFields'
-            let availableFields = [];
-            for (let field in Course.rawAttributes) {
-                if(field !== 'createdAt' && field !== 'updatedAt') {
-                    availableFields.push(field)
-                }
-            }
-    
-            // Loop through the fields being passed via req.body and add ach one to 'requestFields'
-            let requestFields = []
-            for (let key in req.body) {
-                requestFields.push(key)
-            }
-
-            // Make sure that if the title or description fields are being requested to be updated that they are not empty
-            if(requestFields.includes('title') || requestFields.includes('description')) {
-                if(req.body.title.trim() == '' || req.body.description.trim() == '') {
-                    res.status(400).json({message: "Title and description fields cannot be empty"});
-                } else {
-
-                    // Check every field in requestFields against availableFields, if all values in requestedFields are included in availableFields update the Course modal
-                    // with the relative data passed in the req.body
-                    // Else throw an error indicating that the user has passed an invalid argument into the request
-                    if( requestFields.every(x => availableFields.includes(x)) ) {
-                        for (let key in req.body) {
-                            course[key] = req.body[key]
-                        }
-                    } else {
-                        const err = new Error('Invalid argument passed')
-                        throw err;
-                    }
-
-                    await course.save();
-                    res.status(204).end();
-                }
-            }
-
+    try {
+        const courseUpdate = req.body;
+        const course = await Course.findByPk(req.params.id);
+        // If user doesn't own the course
+        if(course.userId !== req.user.id) {
+            res.status(403).json({
+                error: "User doesn't own the requested course."
+            })
+        // If title or description empty, return an error
+        } else if(req.body.title.trim() == '' || req.body.description.trim() == '') {
+                res.status(400).json({message: "Title and description fields cannot be empty"});
         } else {
-            res.status(403).json({ message: "User doesn't own the requested course" })
+            await course.update(courseUpdate);
+            res.status(204).end();
         }
-    } else {
-        res.status(404).json({message: "Course not found."});
+    } catch (error) {
+        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+            const errors = error.errors.map(err => err.message);
+            res.status(400).json({ errors });   
+        } else {
+            throw error;
+        }
     }
 }));
 
