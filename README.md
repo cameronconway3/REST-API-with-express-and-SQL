@@ -1,5 +1,6 @@
 
-# Full Stack JavaScript Techdegree v2 - REST API Project
+# REST API with Express and SQL
+ REST API using Express and an SQL database that lets users create, list, update, and delete items from a school database.
 
 ## Overview of the Provided Project Files
 
